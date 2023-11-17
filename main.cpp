@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <linux/filter.h>
 
-struct Packet   //Структура яка буде рахувати кількість пакетів і розмір
+struct Packet   //Г‘ГІГ°ГіГЄГІГіГ°Г  ГїГЄГ  ГЎГіГ¤ГҐ Г°Г ГµГіГўГ ГІГЁ ГЄВіГ«ГјГЄВіГ±ГІГј ГЇГ ГЄГҐГІВіГў Ві Г°Г®Г§Г¬ВіГ° 
 {   
     int size = 0;
     int count = 0;
@@ -14,13 +14,13 @@ struct Packet   //Структура яка буде рахувати кількість пакетів і розмір
 
 int main() {
     
-    int rawSocket = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));  //Сокет який буде приймати все
+    int rawSocket = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));  //Г‘Г®ГЄГҐГІ ГїГЄГЁГ© ГЎГіГ¤ГҐ ГЇГ°ГЁГ©Г¬Г ГІГЁ ГўГ±ГҐ
     if (rawSocket == -1) {
         std::cerr << "Failed to create a raw socket. Dont forget to use SUDO!" << std::endl;
         return 1;
     }
 
-    struct sock_filter code[] = {       //BPF фільтр який буде фільтрувати "сміття"
+    struct sock_filter code[] = {       //BPF ГґВіГ«ГјГІГ° ГїГЄГЁГ© ГЎГіГ¤ГҐ ГґВіГ«ГјГІГ°ГіГўГ ГІГЁ "Г±Г¬ВіГІГІГї"
     
     BPF_STMT(BPF_LD + BPF_W + BPF_ABS, 0),       
     BPF_JUMP(BPF_JMP + BPF_JEQ + BPF_K, 0x4500, 0, 1),
@@ -30,11 +30,11 @@ int main() {
     BPF_STMT(BPF_RET + BPF_K, 0),                 
     };
 
-    struct sock_fprog bpfProgram;       //Завантаження коду BPF-фільтра в структуру BPF
+    struct sock_fprog bpfProgram;       //Г‡Г ГўГ Г­ГІГ Г¦ГҐГ­Г­Гї ГЄГ®Г¤Гі BPF-ГґВіГ«ГјГІГ°Г  Гў Г±ГІГ°ГіГЄГІГіГ°Гі BPF
     bpfProgram.len = sizeof(code) / sizeof(struct sock_filter);
     bpfProgram.filter = code;
 
-    if (setsockopt(rawSocket, SOL_SOCKET, SO_ATTACH_FILTER, &bpfProgram, sizeof(bpfProgram)) == -1) {       //Прикріплення BPF-фільтра до сокету
+    if (setsockopt(rawSocket, SOL_SOCKET, SO_ATTACH_FILTER, &bpfProgram, sizeof(bpfProgram)) == -1) {       //ГЏГ°ГЁГЄГ°ВіГЇГ«ГҐГ­Г­Гї BPF-ГґВіГ«ГјГІГ°Г  Г¤Г® Г±Г®ГЄГҐГІГі
         std::cerr << "Failed to attach BPF filter." << std::endl;
         close(rawSocket);
         return 1;
@@ -45,7 +45,7 @@ int main() {
 
     while (true) { 
         
-        ssize_t dataSize = recv(rawSocket, buffer, sizeof(buffer), 0);  //Записуємо розмір кожного пакету
+        ssize_t dataSize = recv(rawSocket, buffer, sizeof(buffer), 0);  //Г‡Г ГЇГЁГ±ГіВєГ¬Г® Г°Г®Г§Г¬ВіГ° ГЄГ®Г¦Г­Г®ГЈГ® ГЇГ ГЄГҐГІГі
         
         if (dataSize == -1) {
             std::cerr << "Failed to receive data via raw socket." << std::endl;
