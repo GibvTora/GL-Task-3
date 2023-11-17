@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <linux/filter.h>
 
-struct Packet   //Ñòðóêòóðà ÿêà áóäå ðàõóâàòè ê³ëüê³ñòü ïàêåò³â ³ ðîçì³ð 
+struct Packet   //Структура яка буде рахувати кількість пакетів і розмір
 {   
     int size = 0;
     int count = 0;
@@ -14,13 +14,13 @@ struct Packet   //Ñòðóêòóðà ÿêà áóäå ðàõóâàòè ê³ëüê
 
 int main() {
     
-    int rawSocket = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));  //Ñîêåò ÿêèé áóäå ïðèéìàòè âñå
+    int rawSocket = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));  //Сокет який буде приймати все
     if (rawSocket == -1) {
         std::cerr << "Failed to create a raw socket. Dont forget to use SUDO!" << std::endl;
         return 1;
     }
 
-    struct sock_filter code[] = {       //BPF ô³ëüòð ÿêèé áóäå ô³ëüòðóâàòè "ñì³òòÿ"
+    struct sock_filter code[] = {       //BPF фільтр який буде фільтрувати "сміття"
     
     BPF_STMT(BPF_LD + BPF_W + BPF_ABS, 0),       
     BPF_JUMP(BPF_JMP + BPF_JEQ + BPF_K, 0x4500, 0, 1),
@@ -30,11 +30,11 @@ int main() {
     BPF_STMT(BPF_RET + BPF_K, 0),                 
     };
 
-    struct sock_fprog bpfProgram;       //Çàâàíòàæåííÿ êîäó BPF-ô³ëüòðà â ñòðóêòóðó BPF
+    struct sock_fprog bpfProgram;       //Завантаження коду BPF-фільтра в структуру BPF
     bpfProgram.len = sizeof(code) / sizeof(struct sock_filter);
     bpfProgram.filter = code;
 
-    if (setsockopt(rawSocket, SOL_SOCKET, SO_ATTACH_FILTER, &bpfProgram, sizeof(bpfProgram)) == -1) {       //Ïðèêð³ïëåííÿ BPF-ô³ëüòðà äî ñîêåòó
+    if (setsockopt(rawSocket, SOL_SOCKET, SO_ATTACH_FILTER, &bpfProgram, sizeof(bpfProgram)) == -1) {       //Прикріплення BPF-фільтра до сокету
         std::cerr << "Failed to attach BPF filter." << std::endl;
         close(rawSocket);
         return 1;
@@ -45,7 +45,7 @@ int main() {
 
     while (true) { 
         
-        ssize_t dataSize = recv(rawSocket, buffer, sizeof(buffer), 0);  //Çàïèñóºìî ðîçì³ð êîæíîãî ïàêåòó
+        ssize_t dataSize = recv(rawSocket, buffer, sizeof(buffer), 0);  //Записуємо розмір кожного пакету
         
         if (dataSize == -1) {
             std::cerr << "Failed to receive data via raw socket." << std::endl;
